@@ -1,0 +1,11 @@
+docxtpl
+httpx
+google-generativeai
+python-dotenv
+fastapi==0.111.0
+uvicorn==0.30.1
+python-docx==1.1.0
+rapidfuzz
+pydantic==2.7.1
+pymongo
+sentence-transformers
