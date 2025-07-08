@@ -1,11 +1,11 @@
-# TenderDraft - AI-Powered Document Generator
+# TenderDraft - AI-Powered Document Generator (.NET Backend)
 
-A full-stack application for generating tender documents using AI-powered template processing with FastAPI backend and React frontend.
+A full-stack application for generating tender documents using AI-powered template processing with .NET Core Web API backend and React frontend.
 
 ## 🚀 Features
 
 - **Smart Template Processing**: Upload .docx templates and let AI extract the schema automatically
-- **Intelligent Field Mapping**: AI maps tender data to template fields using advanced embeddings
+- **Intelligent Field Mapping**: AI maps tender data to template fields using advanced algorithms
 - **Rich Text Editor**: Edit and refine documents with a powerful WYSIWYG editor
 - **Professional Output**: Generate and download final documents as .docx files
 - **Real-time Preview**: See changes instantly as you edit field mappings
@@ -13,14 +13,15 @@ A full-stack application for generating tender documents using AI-powered templa
 
 ## 🛠️ Tech Stack
 
-### Backend
-- **FastAPI**: Modern, fast web framework for building APIs
+### Backend (.NET Core)
+- **.NET 8.0**: Modern, cross-platform framework
+- **ASP.NET Core Web API**: RESTful API development
+- **MongoDB.Driver**: MongoDB integration for data storage
+- **DocumentFormat.OpenXml**: For .docx document processing
 - **Google Gemini AI**: For intelligent template parsing and schema extraction
-- **MongoDB**: Document database for storing tender data
-- **Python-docx**: For document processing and generation
-- **Sentence Transformers**: For semantic field mapping
+- **Swagger/OpenAPI**: API documentation
 
-### Frontend
+### Frontend (React)
 - **React 18**: Modern React with hooks and TypeScript
 - **TypeScript**: Type-safe development
 - **Tailwind CSS**: Utility-first CSS framework
@@ -32,30 +33,41 @@ A full-stack application for generating tender documents using AI-powered templa
 ## 📦 Installation & Setup
 
 ### Prerequisites
-- Python 3.8+
+- .NET 8.0 SDK
 - Node.js 16+
 - MongoDB Atlas account (or local MongoDB)
 - Google Gemini API key
 
-### Backend Setup
+### Backend Setup (.NET)
 
-1. **Install Python dependencies**:
+1. **Restore .NET packages**:
    ```bash
-   pip install -r requirements.txt
+   dotnet restore
    ```
 
-2. **Environment Configuration**:
-   Create a `.env` file in the root directory:
-   ```env
-   GEMINI_KEY=your_gemini_api_key_here
+2. **Configuration**:
+   Update `appsettings.json` with your settings:
+   ```json
+   {
+     "MongoDbSettings": {
+       "ConnectionString": "your_mongodb_connection_string",
+       "DatabaseName": "tender_system",
+       "TendersCollectionName": "tenders"
+     },
+     "GeminiSettings": {
+       "ApiKey": "your_gemini_api_key",
+       "ModelName": "gemini-2.0-flash-lite"
+     }
+   }
    ```
 
-3. **Start the FastAPI server**:
+3. **Run the .NET API**:
    ```bash
-   uvicorn backend.main:app --reload --host 0.0.0.0 --port 8000
+   dotnet run
    ```
 
    The backend will be available at `http://localhost:8000`
+   API documentation: `http://localhost:8000/swagger`
 
 ### Frontend Setup
 
@@ -99,44 +111,47 @@ A full-stack application for generating tender documents using AI-powered templa
 ## 🔧 API Endpoints
 
 ### Template Management
-- `POST /docgen/upload-template/` - Upload and parse template
-- `POST /docgen/generate-document/` - Generate final document
+- `POST /api/docgen/upload-template` - Upload and parse template
+- `POST /api/docgen/generate-document` - Generate final document
 
-### Data Fetching
-- `GET /tender/{id}` - Fetch tender data by ID (to be implemented)
+### Tender Data Management
+- `GET /api/tender/{tenderId}` - Fetch tender data by ID
+- `GET /api/tenders` - List all tenders with pagination
+- `GET /api/tender/{tenderId}/fields` - Get available fields for a tender
+
+### Health & Info
+- `GET /` - API information and available endpoints
+- `GET /health` - Health check endpoint
 
 ## 🏗️ Project Structure
 
 ```
-tenderdraft1/
-├── backend/
-│   ├── __init__.py
-│   ├── main.py                 # FastAPI application
-│   ├── config.py              # Configuration and environment variables
-│   ├── routes/
-│   │   ├── __init__.py
-│   │   └── docgen.py          # Document generation routes
-│   └── services/
-│       ├── __init__.py
-│       ├── template_parser.py  # AI-powered template parsing
-│       ├── field_mapper.py     # Semantic field mapping
-│       ├── doc_generator.py    # Document generation logic
-│       └── schema.py          # Schema management
-├── frontend/
-│   ├── src/
-│   │   ├── components/        # Reusable React components
-│   │   ├── pages/            # Page components
-│   │   ├── services/         # API service layer
-│   │   └── main.tsx          # Application entry point
-│   ├── public/               # Static assets
-│   └── package.json          # Frontend dependencies
-├── requirements.txt          # Python dependencies
-└── README.md                # This file
+TenderDraftApi/
+├── Controllers/
+│   ├── DocGenController.cs      # Document generation endpoints
+│   └── TenderController.cs      # Tender data endpoints
+├── Models/
+│   ├── MongoDbSettings.cs       # MongoDB configuration
+│   ├── GeminiSettings.cs        # Gemini AI configuration
+│   ├── TemplateSchema.cs        # Template schema models
+│   └── TenderData.cs           # Tender data models
+├── Services/
+│   ├── MongoDbService.cs        # MongoDB operations
+│   ├── TemplateParserService.cs # AI-powered template parsing
+│   ├── DocumentGeneratorService.cs # Document generation
+│   └── FieldMapperService.cs    # Field mapping logic
+├── storage/
+│   ├── templates/              # Uploaded template files
+│   └── output/                 # Generated documents
+├── frontend/                   # React frontend application
+├── Program.cs                  # Application entry point
+├── appsettings.json           # Configuration
+└── TenderDraftApi.csproj      # Project file
 ```
 
 ## 🔒 Security Considerations
 
-- API keys are stored in environment variables
+- API keys are stored in configuration files (use Azure Key Vault for production)
 - CORS is configured for development (update for production)
 - File uploads are validated for .docx format
 - Input sanitization is implemented for user data
@@ -144,14 +159,24 @@ tenderdraft1/
 ## 🚀 Deployment
 
 ### Backend Deployment
-1. Set up environment variables on your hosting platform
-2. Install dependencies: `pip install -r requirements.txt`
-3. Run with: `uvicorn backend.main:app --host 0.0.0.0 --port $PORT`
+1. **Build the application**:
+   ```bash
+   dotnet publish -c Release -o ./publish
+   ```
+
+2. **Deploy to your hosting platform** (Azure App Service, AWS, etc.)
+3. **Update configuration** for production environment
+4. **Set up environment variables** for sensitive data
 
 ### Frontend Deployment
-1. Build the application: `npm run build`
-2. Deploy the `dist` folder to your static hosting service
-3. Update API base URL for production environment
+1. **Build the application**:
+   ```bash
+   cd frontend
+   npm run build
+   ```
+
+2. **Deploy the `dist` folder** to your static hosting service
+3. **Update API base URL** for production environment
 
 ## 🤝 Contributing
 
@@ -169,8 +194,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 For support and questions:
 - Create an issue in the GitHub repository
-- Check the documentation in the `/docs` folder
-- Review the API documentation at `http://localhost:8000/docs` when running locally
+- Check the API documentation at `http://localhost:8000/swagger` when running locally
+- Review the .NET and React documentation
 
 ## 🔮 Future Enhancements
 
@@ -181,3 +206,5 @@ For support and questions:
 - [ ] Integration with more document formats
 - [ ] Real-time collaboration features
 - [ ] Advanced analytics and reporting
+- [ ] Azure/AWS cloud integration
+- [ ] Docker containerization
